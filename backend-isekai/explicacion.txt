@@ -1,0 +1,114 @@
+Arquitectura del Backend: El Corazón de tu Isekai App
+Tu backend está construido sobre Node.js y el framework Express.js, utilizando MongoDB como base de datos y Mongoose como ORM (Object Relational Mapper) para interactuar con ella. Sigue un patrón de diseño MVC (Modelo-Vista-Controlador) adaptado a una API REST, donde tenemos:
+
+Modelos: Definen la estructura de los datos y cómo interactúan con MongoDB.
+
+Controladores: Contienen la lógica de negocio, procesan las peticiones y orquestan las interacciones con los modelos.
+
+Rutas: Definen los endpoints de la API (las URLs) y dirigen las peticiones a los controladores adecuados.
+
+Middleware: Funciones que se ejecutan antes de que las peticiones lleguen a los controladores, útiles para autenticación, autorización, etc.
+
+Lo que Hemos Implementado Paso a Paso
+Aquí te detallo cada componente y funcionalidad que hemos desarrollado:
+
+1. Configuración Inicial y Conexión a la Base de Datos
+server.js: Es el punto de entrada de tu aplicación. Aquí se configura Express, se conecta a MongoDB y se enlazan todas las rutas.
+
+config/db.js: Contiene la lógica para establecer la conexión con tu base de datos MongoDB utilizando Mongoose, asegurando que la aplicación pueda leer y escribir datos.
+
+.env: Archivo crucial para almacenar variables de entorno (como la URI de MongoDB, el secreto JWT y el puerto), manteniendo la información sensible fuera del código fuente y permitiendo diferentes configuraciones para desarrollo y producción.
+
+2. Autenticación y Autorización de Usuarios
+models/User.js: Define el esquema del usuario con campos como nombreUsuario, email, contrasena (hashed), rol, puntosExperiencia, nivelActual, y arrays para terapiasCompletadas, logrosCompletados y desafiosCompletados. Incluye pre-hooks de Mongoose para hashear contraseñas (bcrypt) antes de guardar y métodos para generar JWTs.
+
+controllers/authController.js: Maneja la lógica de registro de nuevos usuarios y el inicio de sesión.
+
+Registro: Crea un nuevo usuario, hashea la contraseña y genera un token JWT.
+
+Login: Verifica las credenciales, compara la contraseña hasheada y, si son correctas, genera un token JWT.
+
+routes/auth.js: Define los endpoints /api/auth/register y /api/auth/login.
+
+middleware/authMiddleware.js: Contiene el middleware protegerRuta que verifica el token JWT en las peticiones. Si el token es válido, decodifica el ID del usuario, busca al usuario en la BD y lo adjunta a req.usuario, lo que permite que los controladores sepan quién está haciendo la petición. También incluye autorizarRol para restringir el acceso a ciertas rutas basándose en el rol del usuario.
+
+3. Gestión de Terapias y Tareas
+models/Terapia.js: Define el esquema para las terapias (título, descripción, XP de recompensa, duración, categoría).
+
+models/Tarea.js: Un modelo simple para registrar cuándo un usuario completa una terapia específica, enlazando al usuario y la terapia.
+
+controllers/terapiaController.js: Lógica para crear, obtener, actualizar y eliminar terapias (generalmente accesible por administradores o profesionales).
+
+routes/terapias.js: Define los endpoints para la gestión de terapias (/api/terapias).
+
+controllers/tareaController.js:
+
+completarTarea: Este es un controlador clave. Cuando un paciente completa una terapia:
+
+Registra la Tarea en la base de datos.
+
+Añade la terapia completada al historial terapiasCompletadas del usuario.
+
+Incrementa los puntosExperiencia del usuario con la recompensa de la terapia.
+
+¡Dispara la lógica de gamificación! Llama a otorgaLogros y otorgaDesafios.
+
+Actualiza el nivelActual del usuario si ha ganado suficiente XP.
+
+routes/tareas.js: Define el endpoint POST /api/tareas/completar.
+
+4. Sistema de Gamificación (Logros y Desafíos)
+models/Logro.js: Define el esquema para los logros (nombre, descripción, criterio como terapiasCompletadas o xpAcumulado, valor requerido y recompensa XP).
+
+models/Desafio.js: Define el esquema para los desafíos (nombre, descripción, tipo de acción como terapiasCompletadas, xpGanado, registrosAnimo, meditacionMinutos, valor requerido, recompensa XP y frecuencia (diario, semanal, unico)).
+
+Importante: El enum del campo tipo fue crucial para validar los diferentes tipos de desafíos que puedes crear.
+
+controllers/logroController.js: Contiene la lógica para crear y obtener logros. La asignación principal ocurre en otorgaLogros.
+
+otorgaLogros: Se encarga de revisar los logros disponibles y, si el usuario cumple el criterio (ej. total de terapias completadas o XP acumulado), se le asigna el logro y gana XP. Los logros son permanentes y se otorgan una sola vez.
+
+controllers/desafioController.js: Contiene la lógica para crear y obtener desafíos. La asignación principal ocurre en otorgaDesafios.
+
+DesafioCompletado (función auxiliar): Verifica si un desafío ya fue completado por el usuario dentro del período de su frecuencia (diario, semanal, único), para evitar otorgarlo repetidamente en el mismo ciclo.
+
+otorgaDesafios: Esta es la función central para los desafíos. Se llama cada vez que el usuario realiza una acción relevante (completar terapia, registrar ánimo).
+
+Itera sobre todos los desafíos disponibles.
+
+Utiliza un switch para verificar el tipo de desafío (terapiasCompletadas, xpGanado, registrosAnimo, etc.) y compara el valorAccion (el dato relevante de la acción actual) con el valorRequerido del desafío.
+
+Si el criterio se cumple y el desafío no ha sido completado aún en el período, se asigna al usuario y se le otorga XP.
+
+routes/logros.js y routes/desafios.js: Definen los endpoints para gestionar logros y desafíos.
+
+5. Registro de Estado de Ánimo (Nueva Funcionalidad Interactiva)
+models/EstadoAnimo.js: Un nuevo modelo para registrar el estado de ánimo del usuario en un fecha específica, con notas opcionales.
+
+controllers/estadoAnimoController.js:
+
+registrarEstadoAnimo: Recibe el estado de ánimo del frontend.
+
+Guarda el registro en la base de datos.
+
+Llama a otorgaDesafios pasando el tipoAccion como 'registrosAnimo' y el valorAccion como 1 (indicando que se realizó un registro). Esto permite que los desafíos de tipo registrosAnimo se activen.
+
+obtenerHistorialEstadoAnimo: Permite al usuario consultar sus registros de ánimo anteriores.
+
+routes/estadoAnimo.js: Define los endpoints POST /api/estado-animo y GET /api/estado-animo.
+
+En Resumen: El Flujo Completo
+Un usuario se registra/inicia sesión y obtiene un JWT.
+
+El usuario realiza acciones en la aplicación (completa una terapia, registra su ánimo, etc.).
+
+Cada vez que se realiza una acción relevante, el controlador correspondiente (ej., tareaController, estadoAnimoController) llama a las funciones otorgaLogros y otorgaDesafios.
+
+Estas funciones analizan el perfil del usuario, los logros/desafíos disponibles y el tipo de acción realizada para determinar si algún hito o tarea ha sido cumplida.
+
+Si es así, el usuario gana XP, su nivel puede subir, y los logros/desafíos completados se añaden a su perfil.
+
+El frontend consume estos endpoints para mostrar la interfaz, los formularios, los perfiles actualizados, los logros obtenidos y los desafíos pendientes/completados.
+
+Hemos construido un backend robusto y modular, listo para ser consumido por tu frontend. ¡La base de tu aplicación de bienestar está muy bien cimentada!
+

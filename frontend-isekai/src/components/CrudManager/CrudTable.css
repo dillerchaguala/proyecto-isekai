@@ -1,0 +1,69 @@
+/* frontend-isekai/src/components/CrudManager/CrudTable.css */
+.crud-table-container {
+    overflow-x: auto; /* Permite scroll horizontal en tablas grandes */
+    margin-top: 20px;
+}
+
+.crud-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden; /* Para que los bordes redondeados se apliquen bien */
+}
+
+.crud-table th,
+.crud-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.crud-table thead th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.crud-table tbody tr:hover {
+    background-color: #f2f2f2;
+    transition: background-color 0.2s ease;
+}
+
+.crud-table-actions {
+    white-space: nowrap; /* Evita que los botones se envuelvan */
+    text-align: center;
+}
+
+.crud-edit-button,
+.crud-delete-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background-color 0.3s ease;
+    margin: 0 5px; /* Espacio entre botones */
+}
+
+.crud-edit-button {
+    background-color: #ffc107; /* Amarillo */
+    color: #333;
+}
+
+.crud-edit-button:hover {
+    background-color: #e0a800;
+}
+
+.crud-delete-button {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+}
+
+.crud-delete-button:hover {
+    background-color: #c82333;
+}

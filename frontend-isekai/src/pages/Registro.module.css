@@ -1,0 +1,108 @@
+/* src/pages/Registro.module.css */
+.contenedorRegistro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f0f8ff; /* Un color de fondo suave */
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+.tarjetaRegistro {
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #fff;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.tarjetaRegistro h2 {
+    margin-bottom: 25px;
+    color: #2c3e50; /* Un color de título más oscuro */
+}
+
+.grupoInput {
+    margin-bottom: 18px; /* Un poco más de espacio */
+    text-align: left;
+}
+
+.grupoInput label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #34495e;
+    font-size: 0.95em;
+}
+
+.inputCampo {
+    width: 100%;
+    padding: 12px; /* Un poco más de padding */
+    border-radius: 5px; /* Bordes más suaves */
+    border: 1px solid #c0d4e7; /* Un borde más suave */
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.inputCampo:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Un halo al enfocar */
+}
+
+.botonPrincipal {
+    width: 100%;
+    padding: 14px; /* Un botón más grande */
+    border-radius: 5px;
+    border: none;
+    background-color: #28a745; /* Verde para el registro */
+    color: white;
+    font-size: 17px; /* Fuente ligeramente más grande */
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.botonPrincipal:hover {
+    background-color: #218838;
+    transform: translateY(-1px); /* Efecto ligero al pasar el mouse */
+}
+
+.botonPrincipal:active {
+    transform: translateY(0);
+}
+
+.mensajeError {
+    color: #dc3545; /* Rojo para errores */
+    margin-top: 15px;
+    font-size: 0.95em;
+    font-weight: 500;
+}
+
+.mensajeExito {
+    color: #28a745; /* Verde para éxito */
+    margin-top: 15px;
+    font-size: 0.95em;
+    font-weight: 500;
+}
+
+.textoLogin {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.enlaceLogin {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.enlaceLogin:hover {
+    text-decoration: underline;
+}

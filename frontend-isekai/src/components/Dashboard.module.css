@@ -1,0 +1,126 @@
+/* frontend-isekai/src/pages/Dashboard.module.css */
+
+.contenedorDashboard {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #2a2a3a;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    color: #e0e0e0;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+.contenedorDashboard h1 {
+    color: #8a2be2;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.6);
+}
+
+.contenedorDashboard p {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    color: #c0c0c0;
+}
+
+.seccionAdminTerapeuta {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #3a3a4a;
+    border-radius: 8px;
+    border: 1px solid #5a5a6a;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.seccionAdminTerapeuta h2 {
+    color: #6a5acd;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.listaOpciones {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.listaOpciones li {
+    margin: 0;
+}
+
+.botonOpcion {
+    background-color: #8a2be2;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 180px;
+}
+
+.botonOpcion:hover {
+    background-color: #6a1ac2;
+    transform: translateY(-2px);
+}
+
+.botonOpcion:active {
+    transform: translateY(0);
+}
+
+.seccionPaciente {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #3a3a4a;
+    border-radius: 8px;
+    border: 1px solid #5a5a6a;
+    color: #c0c0c0;
+}
+
+.enlaceInline {
+    background: none;
+    border: none;
+    color: #8a2be2;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.enlaceInline:hover {
+    color: #6a1ac2;
+}
+
+.botonSalir {
+    background-color: #dc3545; /* Rojo para salir */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 30px;
+}
+
+.botonSalir:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+.contenedorCarga {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+    color: #e0e0e0;
+    background-color: #3a3a4a;
+    border-radius: 8px;
+    margin-top: 20px;
+}

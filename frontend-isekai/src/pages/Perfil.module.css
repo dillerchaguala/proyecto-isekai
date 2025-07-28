@@ -1,0 +1,66 @@
+/* src/pages/Perfil.module.css */
+.contenedorPerfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #e0f7fa; /* Un color de fondo diferente para distinguirlo */
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+.tarjetaPerfil {
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.tarjetaPerfil h2 {
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.infoUsuario {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    color: #333;
+    line-height: 1.6;
+}
+
+.infoUsuario strong {
+    color: #0056b3;
+}
+
+.botonCerrarSesion {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #dc3545; /* Rojo para el botón de logout */
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.botonCerrarSesion:hover {
+    background-color: #c82333;
+}
+
+.mensajeCargando {
+    color: #007bff;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.mensajeError {
+    color: #dc3545;
+    margin-top: 10px;
+    font-size: 1em;
+    font-weight: bold;
+}
