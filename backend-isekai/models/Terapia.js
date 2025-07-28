@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const EsquemaTerapia = new mongoose.Schema({
-    // Cambiado 'titulo' a 'nombre' para coincidir con el frontend
     nombre: {
         type: String,
         required: true,
@@ -15,19 +14,21 @@ const EsquemaTerapia = new mongoose.Schema({
     tipo: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        // --- SUGERENCIA: Añadir enum si los tipos son predefinidos ---
+        // Si los tipos de terapia son específicos (ej. 'Individual', 'Grupal', 'Online'),
+        // es MUY RECOMENDABLE usar un enum para validar los valores.
+        // Ejemplo: enum: ['Individual', 'Grupal', 'Online', 'Presencial'],
+        // Si no tienes un enum claro, déjalo como String simple.
     },
-    // Añadido 'duracionMinutos' para coincidir con el frontend
     duracionMinutos: {
         type: Number,
         required: true
     },
-    // Añadido 'costo' para coincidir con el frontend
     costo: {
         type: Number,
         required: true
     },
-    // Cambiado 'estado' a 'isActive' y tipo a Boolean para coincidir con el frontend
     isActive: { // Representa si la terapia está activa o inactiva
         type: Boolean,
         default: false // O true, según tu preferencia inicial
@@ -44,34 +45,27 @@ const EsquemaTerapia = new mongoose.Schema({
     },
     puntosXP: {
         type: Number,
-        required: false, // Hago opcional si no lo manejas desde el frontend directamente
+        required: false,
         default: 100
     },
     nivelRequerido: {
         type: Number,
-        required: false, // Hago opcional si no lo manejas desde el frontend directamente
+        required: false,
         default: 1
     },
-    creadoPor: { // Si es un campo interno, asegúrate de que se asigne en el controlador
+    creadoPor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: false // Hago opcional si no lo manejas desde el frontend directamente
-    },
-    // timestamps de Mongoose suelen manejar esto automáticamente, pero los tienes definidos
-    fechaCreacion: {
-        type: Date,
-        default: Date.now
-    },
-    ultimaActualizacion: {
-        type: Date,
-        default: Date.now
+        required: false
     }
-}, { timestamps: true }); // Mongoose puede manejar automáticamente createdAt y updatedAt si quitas los tuyos manuales y dejas solo esto.
-
-// Middleware para actualizar la fecha de última actualización
-EsquemaTerapia.pre('save', function(next) {
-    this.ultimaActualizacion = Date.now();
-    next();
+    // --- ELIMINADOS: fechaCreacion y ultimaActualizacion ---
+    // Mongoose los manejará automáticamente con timestamps: true
+}, {
+    timestamps: true // Esto añadirá 'createdAt' y 'updatedAt' automáticamente.
+                     // Y se actualizará 'updatedAt' en cada save/update.
 });
+
+// --- ELIMINADO: Middleware para actualizar la fecha de última actualización ---
+// Mongoose ya lo hace con timestamps: true
 
 module.exports = mongoose.model('Terapia', EsquemaTerapia);

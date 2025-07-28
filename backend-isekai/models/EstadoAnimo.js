@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const EstadoAnimoSchema = new mongoose.Schema({
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Usuario',
         required: true,
     },
     estado: { // Ej. 'Excelente', 'Bien', 'Neutral', 'Mal', 'Muy Mal'

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     crearDesafio,
-    TodosLosDesafios,
+    obtenerDesafios,
     obtenerDesafioPorId, // <-- Añadido
     actualizarDesafio,   // <-- Añadido
     eliminarDesafio      // <-- Añadido
@@ -25,7 +25,7 @@ router.route('/')
     // @desc    Obtener todos los desafíos (para el CrudManager, un admin/terapeuta necesita ver todos)
     // @route   GET /api/desafiosDiarios
     // @access  Private (Admin/Terapeuta para ver todos, Paciente para ver solo activos)
-    .get(protegerRuta, TodosLosDesafios); // La lógica de filtro por rol ya está en el controlador
+    .get(protegerRuta, obtenerDesafios); // La lógica de filtro por rol ya está en el controlador
 
 // Rutas para /api/desafiosDiarios/:id
 

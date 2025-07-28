@@ -6,28 +6,22 @@ const {
     obtenerTerapiaPorId,
     actualizarTerapia,
     eliminarTerapia
-} = require('../controllers/terapiaController'); // Importa las funciones del controlador de terapias
+} = require('../controllers/terapiaController');
 
-const { protegerRuta } = require('../middleware/authMiddleware'); // Importa el middleware de protección
+// Asegúrate de importar autorizarRol
+const { protegerRuta, autorizarRol } = require('../middleware/authMiddleware'); // <--- CAMBIO AQUÍ
 
 const router = express.Router();
 
-// Rutas para /api/terapias
-
-// POST /api/terapias - Crear una nueva terapia (Solo Admin/Terapeuta y autenticado)
-// GET /api/terapias - Obtener todas las terapias (Público si activas, Admin/Terapeuta todas)
 router.route('/')
-    .post(protegerRuta, crearTerapia) // Protegida: requiere autenticación y rol
-    .get(obtenerTerapias); // No protegida por protect middleware aquí, la lógica de rol está en el controlador
+    // Aplica autorizarRol directamente en la ruta para mayor claridad
+    .post(protegerRuta, autorizarRol(['administrador', 'terapeuta']), crearTerapia) // <--- CAMBIO AQUÍ
+    .get(obtenerTerapias);
 
-// Rutas para /api/terapias/:id
-
-// GET /api/terapias/:id - Obtener una terapia específica por ID (Público si activa, Admin/Terapeuta cualquier estado)
-// PUT /api/terapias/:id - Actualizar una terapia (Solo Admin/Terapeuta y autenticado)
-// DELETE /api/terapias/:id - Eliminar una terapia (Solo Admin/Terapeuta y autenticado)
 router.route('/:id')
-    .get(obtenerTerapiaPorId) // No protegida por protect middleware aquí, la lógica de rol está en el controlador
-    .put(protegerRuta, actualizarTerapia) // Protegida
-    .delete(protegerRuta, eliminarTerapia); // Protegida
+    .get(obtenerTerapiaPorId)
+    // Aplica autorizarRol directamente en la ruta para mayor claridad
+    .put(protegerRuta, autorizarRol(['administrador', 'terapeuta']), actualizarTerapia) // <--- CAMBIO AQUÍ
+    .delete(protegerRuta, autorizarRol(['administrador', 'terapeuta']), eliminarTerapia); // O solo ['administrador'] si solo admins pueden eliminar
 
 module.exports = router;

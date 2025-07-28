@@ -1,217 +1,233 @@
 const Terapia = require('../models/Terapia'); // Importa el modelo de Terapia
+const AppError = require('../utils/appError'); // Si estás usando AppError para manejar errores
+const catchAsync = require('../utils/catchAsync'); // Si estás usando catchAsync
 
-// @desc    Crear un nuevo módulo de terapia
-// @route   POST /api/terapias
-// @access  Private (Admin/Terapeuta)
-const crearTerapia = async (req, res) => {
-    // CAMBIO 1: Ajusta los nombres de las variables para que coincidan con el frontend
-    //          y añade 'duracionMinutos', 'costo', 'isActive'
-    const { nombre, descripcion, tipo, duracionMinutos, costo, isActive, contenidoURL, textoCompleto, puntosXP, nivelRequerido } = req.body;
+/**
+ * @desc    Crear un nuevo módulo de terapia
+ * @route   POST /api/terapias
+ * @access  Private (Admin/Terapeuta - rol verificado por middleware en la ruta)
+ */
+const crearTerapia = catchAsync(async (req, res, next) => {
+    // Los middlewares de autenticación y autorización (protegerRuta, autorizarRol)
+    // ya deberían haber verificado que req.usuario existe y tiene el rol correcto.
+    // Por lo tanto, NO es necesario repetir la validación de rol aquí.
 
-    const creadoPor = req.usuario._id;
-    const rolUsuario = req.usuario.rol;
+    const {
+        nombre,
+        descripcion,
+        tipo,
+        duracionMinutos,
+        costo,
+        isActive, // Ahora también viene del frontend, maneja el estado de actividad
+        contenidoURL,
+        textoCompleto,
+        puntosXP,
+        nivelRequerido
+    } = req.body;
 
-    if (rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
-        return res.status(403).json({ message: 'Acceso denegado. Solo administradores o terapeutas pueden crear terapias.' });
+    const creadoPor = req.usuario._id; // Asume que req.usuario está disponible del middleware
+
+    // Validación básica de campos obligatorios
+    if (!nombre || !descripcion || !tipo) {
+        return next(new AppError('Nombre, descripción y tipo son campos obligatorios.', 400));
     }
 
-    try {
-        // CAMBIO 2: Usa 'nombre' en lugar de 'titulo' para la verificación de existencia
+    // Opcional: Validaciones de tipo y rango para campos numéricos
+    if (duracionMinutos !== undefined && (typeof duracionMinutos !== 'number' || duracionMinutos < 0)) {
+        return next(new AppError('La duración en minutos debe ser un número positivo.', 400));
+    }
+    if (costo !== undefined && (typeof costo !== 'number' || costo < 0)) {
+        return next(new AppError('El costo debe ser un número positivo.', 400));
+    }
+    if (puntosXP !== undefined && (typeof puntosXP !== 'number' || puntosXP < 0)) {
+        return next(new AppError('Los puntos de experiencia deben ser un número positivo.', 400));
+    }
+    if (nivelRequerido !== undefined && (typeof nivelRequerido !== 'number' || nivelRequerido < 0)) {
+        return next(new AppError('El nivel requerido debe ser un número positivo.', 400));
+    }
+
+
+    // Verificar si ya existe una terapia con el mismo nombre
+    const terapiaExistente = await Terapia.findOne({ nombre });
+    if (terapiaExistente) {
+        return next(new AppError('Ya existe una terapia con este nombre. Por favor, elige otro.', 400));
+    }
+
+    const nuevaTerapia = new Terapia({
+        nombre,
+        descripcion,
+        tipo,
+        duracionMinutos,
+        costo,
+        // Si isActive no se proporciona, usa el valor por defecto del esquema (que es 'true')
+        // Si se proporciona, usa el valor enviado.
+        isActive: isActive !== undefined ? isActive : true, // O 'false' si tu política inicial es que sea inactiva
+        contenidoURL,
+        textoCompleto,
+        puntosXP,
+        nivelRequerido,
+        creadoPor
+    });
+
+    const terapiaGuardada = await nuevaTerapia.save();
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            terapia: terapiaGuardada // Clave singular para un solo objeto
+        }
+    });
+});
+
+
+
+/**
+ * @desc    Obtener todas las terapias (o filtradas por isActive)
+ * @route   GET /api/terapias
+ * @access  Public (solo terapias activas para usuarios no-admin/terapeuta), Private (Admin/Terapeuta para todas)
+ */
+const obtenerTerapias = catchAsync(async (req, res, next) => {
+    // req.usuario se adjunta por el middleware de autenticación si un token JWT válido está presente.
+    const rolUsuario = req.usuario ? req.usuario.rol : null;
+
+    let query = {};
+    // Si el usuario NO es administrador ni terapeuta, solo mostrar terapias activas.
+    if (rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
+        query.isActive = true;
+    }
+
+    const terapias = await Terapia.find(query).populate('creadoPor', 'nombreUsuario correoElectronico rol');
+
+    res.status(200).json({
+        status: 'success',
+        results: terapias.length, // Añade el número de resultados para consistencia
+        data: {
+            terapias // Clave PLURAL 'terapias' para la lista
+        }
+    });
+});
+
+
+
+/**
+ * @desc    Obtener una terapia por ID
+ * @route   GET /api/terapias/:id
+ * @access  Public (si está activa), Private (Admin/Terapeuta para cualquier estado)
+ */
+const obtenerTerapiaPorId = catchAsync(async (req, res, next) => {
+    const rolUsuario = req.usuario ? req.usuario.rol : null;
+
+    const terapia = await Terapia.findById(req.params.id).populate('creadoPor', 'nombreUsuario correoElectronico rol');
+
+    if (!terapia) {
+        return next(new AppError('Terapia no encontrada.', 404));
+    }
+
+    // Si la terapia no está activa Y el usuario NO es admin/terapeuta, denegar acceso.
+    if (!terapia.isActive && rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
+        return next(new AppError('Acceso denegado. Esta terapia no está activa o no tienes permisos para verla.', 403));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            terapia // Clave singular para un solo objeto
+        }
+    });
+});
+
+
+
+/**
+ * @desc    Actualizar un módulo de terapia
+ * @route   PUT /api/terapias/:id (o PATCH si solo se permiten actualizaciones parciales)
+ * @access  Private (Admin/Terapeuta - rol verificado por middleware en la ruta)
+ */
+const actualizarTerapia = catchAsync(async (req, res, next) => {
+    // NO es necesario repetir la validación de rol aquí, ya la maneja el middleware de ruta.
+
+    const {
+        nombre,
+        descripcion,
+        tipo,
+        duracionMinutos,
+        costo,
+        isActive,
+        contenidoURL,
+        textoCompleto,
+        puntosXP,
+        nivelRequerido
+    } = req.body;
+
+    let terapia = await Terapia.findById(req.params.id);
+
+    if (!terapia) {
+        return next(new AppError('Terapia no encontrada.', 404));
+    }
+
+    // Opcional: Validaciones de tipo y rango para campos numéricos en la actualización
+    if (duracionMinutos !== undefined && (typeof duracionMinutos !== 'number' || duracionMinutos < 0)) {
+        return next(new AppError('La duración en minutos debe ser un número positivo.', 400));
+    }
+    if (costo !== undefined && (typeof costo !== 'number' || costo < 0)) {
+        return next(new AppError('El costo debe ser un número positivo.', 400));
+    }
+    if (puntosXP !== undefined && (typeof puntosXP !== 'number' || puntosXP < 0)) {
+        return next(new AppError('Los puntos de experiencia deben ser un número positivo.', 400));
+    }
+    if (nivelRequerido !== undefined && (typeof nivelRequerido !== 'number' || nivelRequerido < 0)) {
+        return next(new AppError('El nivel requerido debe ser un número positivo.', 400));
+    }
+
+    // Verificar si el nuevo nombre ya existe y no pertenece a la misma terapia
+    if (nombre && nombre !== terapia.nombre) {
         const terapiaExistente = await Terapia.findOne({ nombre });
-        if (terapiaExistente) {
-            return res.status(400).json({ message: 'Ya existe una terapia con este nombre.' });
+        if (terapiaExistente && String(terapiaExistente._id) !== String(terapia._id)) {
+            return next(new AppError('Ya existe otra terapia con este nombre.', 400));
         }
-
-        const nuevaTerapia = new Terapia({
-            // CAMBIO 3: Asigna los nuevos campos al crear la terapia
-            nombre, // Usar 'nombre' en lugar de 'titulo'
-            descripcion,
-            tipo,
-            duracionMinutos, // Añadido
-            costo,           // Añadido
-            isActive: isActive !== undefined ? isActive : false, // Añadido, asegura que sea booleano
-            contenidoURL,
-            textoCompleto,
-            puntosXP,
-            nivelRequerido,
-            // Eliminado 'estado', ahora se maneja con 'isActive'
-            creadoPor
-        });
-
-        const terapiaGuardada = await nuevaTerapia.save();
-        // CAMBIO 4: Envuelve la respuesta en un objeto 'data' con la clave 'terapia' (singular)
-        //          Esto se espera para la creación/actualización de un solo recurso en el frontend
-        res.status(201).json({
-            status: 'success',
-            data: {
-                terapia: terapiaGuardada // Clave singular para un solo objeto
-            }
-        });
-
-    } catch (error) {
-        console.error(error.message);
-        if (error.name === 'ValidationError') { // Mongoose Validation Error
-            let errors = {};
-            Object.keys(error.errors).forEach((key) => {
-                errors[key] = error.errors[key].message;
-            });
-            return res.status(400).json({ message: 'Error de validación', errors });
-        }
-        res.status(500).json({ message: 'Error del servidor al crear la terapia.' });
-    }
-};
-
-// @desc    Obtener todas las terapias (o filtradas por isActive)
-// @route   GET /api/terapias
-// @access  Public (solo terapias activas), Private (Admin/Terapeuta para todas)
-const obtenerTerapias = async (req, res) => {
-    const rolUsuario = req.usuario ? req.usuario.rol : null;
-
-    try {
-        let query = {};
-        // CAMBIO 5: Usa 'isActive' en lugar de 'estado' para filtrar
-        if (rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
-            query.isActive = true; // Solo activas para usuarios no-admin/terapeuta
-        }
-
-        const terapias = await Terapia.find(query).populate('creadoPor', 'nombreUsuario correoElectronico rol');
-        // CAMBIO 6: Envuelve la respuesta en un objeto 'data' con la clave 'terapias' (plural)
-        res.status(200).json({
-            status: 'success',
-            data: {
-                terapias // <-- ¡Esta clave debe ser 'terapias' (plural)!
-            }
-        });
-
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: 'Error del servidor al obtener las terapias.' });
-    }
-};
-
-// @desc    Obtener una terapia por ID
-// @route   GET /api/terapias/:id
-// @access  Public (si está activa), Private (Admin/Terapeuta para cualquier estado)
-const obtenerTerapiaPorId = async (req, res) => {
-    const rolUsuario = req.usuario ? req.usuario.rol : null;
-
-    try {
-        const terapia = await Terapia.findById(req.params.id).populate('creadoPor', 'nombreUsuario correoElectronico rol');
-
-        if (!terapia) {
-            return res.status(404).json({ message: 'Terapia no encontrada.' });
-        }
-
-        // CAMBIO 7: Usa 'isActive' en lugar de 'estado' para la verificación de acceso
-        if (!terapia.isActive && rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
-            return res.status(403).json({ message: 'Acceso denegado. Esta terapia no está activa.' });
-        }
-
-        // CAMBIO 8: Envuelve la respuesta en un objeto 'data' con la clave 'terapia' (singular)
-        res.status(200).json({
-            status: 'success',
-            data: {
-                terapia // Clave singular para un solo objeto
-            }
-        });
-
-    } catch (error) {
-        console.error(error.message);
-        if (error.kind === 'ObjectId') {
-            return res.status(400).json({ message: 'ID de terapia no válido.' });
-        }
-        res.status(500).json({ message: 'Error del servidor al obtener la terapia.' });
-    }
-};
-
-// @desc    Actualizar un módulo de terapia
-// @route   PUT /api/terapias/:id
-// @access  Private (Admin/Terapeuta)
-const actualizarTerapia = async (req, res) => {
-    // CAMBIO 9: Ajusta los nombres de las variables para que coincidan con el frontend
-    //          y añade 'duracionMinutos', 'costo', 'isActive'
-    const { nombre, descripcion, tipo, duracionMinutos, costo, isActive, contenidoURL, textoCompleto, puntosXP, nivelRequerido } = req.body;
-    const rolUsuario = req.usuario.rol;
-
-    if (rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
-        return res.status(403).json({ message: 'Acceso denegado. Solo administradores o terapeutas pueden actualizar terapias.' });
     }
 
-    try {
-        let terapia = await Terapia.findById(req.params.id);
+    // Actualizar campos solo si se proporcionan en el cuerpo de la solicitud
+    terapia.nombre = nombre !== undefined ? nombre : terapia.nombre;
+    terapia.descripcion = descripcion !== undefined ? descripcion : terapia.descripcion;
+    terapia.tipo = tipo !== undefined ? tipo : terapia.tipo;
+    terapia.duracionMinutos = duracionMinutos !== undefined ? duracionMinutos : terapia.duracionMinutos;
+    terapia.costo = costo !== undefined ? costo : terapia.costo;
+    terapia.isActive = isActive !== undefined ? isActive : terapia.isActive;
+    terapia.contenidoURL = contenidoURL !== undefined ? contenidoURL : terapia.contenidoURL;
+    terapia.textoCompleto = textoCompleto !== undefined ? textoCompleto : terapia.textoCompleto;
+    terapia.puntosXP = puntosXP !== undefined ? puntosXP : terapia.puntosXP;
+    terapia.nivelRequerido = nivelRequerido !== undefined ? nivelRequerido : terapia.nivelRequerido;
 
-        if (!terapia) {
-            return res.status(404).json({ message: 'Terapia no encontrada.' });
+    const terapiaActualizada = await terapia.save(); // Guarda los cambios, actualizando `updatedAt`
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            terapia: terapiaActualizada // Clave singular para un solo objeto
         }
+    });
+});
 
-        // CAMBIO 10: Actualiza campos usando los nuevos nombres
-        terapia.nombre = nombre !== undefined ? nombre : terapia.nombre; // Usar 'nombre' en lugar de 'titulo'
-        terapia.descripcion = descripcion !== undefined ? descripcion : terapia.descripcion;
-        terapia.tipo = tipo !== undefined ? tipo : terapia.tipo;
-        terapia.duracionMinutos = duracionMinutos !== undefined ? duracionMinutos : terapia.duracionMinutos; // Añadido
-        terapia.costo = costo !== undefined ? costo : terapia.costo; // Añadido
-        terapia.isActive = isActive !== undefined ? isActive : terapia.isActive; // Añadido, usar para checkbox
-        terapia.contenidoURL = contenidoURL !== undefined ? contenidoURL : terapia.contenidoURL;
-        terapia.textoCompleto = textoCompleto !== undefined ? textoCompleto : terapia.textoCompleto;
-        terapia.puntosXP = puntosXP !== undefined ? puntosXP : terapia.puntosXP;
-        terapia.nivelRequerido = nivelRequerido !== undefined ? nivelRequerido : terapia.nivelRequerido;
-        // Eliminado 'estado', ahora se maneja con 'isActive'
-        // ultimaActualizacion se actualiza automáticamente por el middleware pre-save
 
-        const terapiaActualizada = await terapia.save();
-        // CAMBIO 11: Envuelve la respuesta en un objeto 'data' con la clave 'terapia' (singular)
-        res.status(200).json({
-            status: 'success',
-            data: {
-                terapia: terapiaActualizada // Clave singular para un solo objeto
-            }
-        });
+/**
+ * @desc    Eliminar un módulo de terapia
+ * @route   DELETE /api/terapias/:id
+ * @access  Private (Admin/Terapeuta - rol verificado por middleware en la ruta)
+ */
+const eliminarTerapia = catchAsync(async (req, res, next) => {
+    // NO es necesario repetir la validación de rol aquí, ya la maneja el middleware de ruta.
 
-    } catch (error) {
-        console.error(error.message);
-        if (error.name === 'ValidationError') {
-            let errors = {};
-            Object.keys(error.errors).forEach((key) => {
-                errors[key] = error.errors[key].message;
-            });
-            return res.status(400).json({ message: 'Error de validación', errors });
-        }
-        if (error.kind === 'ObjectId') {
-            return res.status(400).json({ message: 'ID de terapia no válido.' });
-        }
-        res.status(500).json({ message: 'Error del servidor al actualizar la terapia.' });
-    }
-};
+    const terapia = await Terapia.findById(req.params.id);
 
-// @desc    Eliminar un módulo de terapia
-// @route   DELETE /api/terapias/:id
-// @access  Private (Admin/Terapeuta)
-const eliminarTerapia = async (req, res) => {
-    const rolUsuario = req.usuario.rol;
-
-    if (rolUsuario !== 'administrador' && rolUsuario !== 'terapeuta') {
-        return res.status(403).json({ message: 'Acceso denegado. Solo administradores o terapeutas pueden eliminar terapias.' });
+    if (!terapia) {
+        return next(new AppError('Terapia no encontrada para eliminar.', 404));
     }
 
-    try {
-        const terapia = await Terapia.findById(req.params.id);
+    await Terapia.deleteOne({ _id: req.params.id }); // O `await Terapia.findByIdAndDelete(req.params.id);`
 
-        if (!terapia) {
-            return res.status(404).json({ message: 'Terapia no encontrada.' });
-        }
-
-        await Terapia.deleteOne({ _id: req.params.id });
-        // CAMBIO 12: Envuelve la respuesta de eliminación para consistencia (opcional, pero buena práctica)
-        res.status(200).json({ status: 'success', message: 'Terapia eliminada exitosamente.' });
-
-    } catch (error) {
-        console.error(error.message);
-        if (error.kind === 'ObjectId') {
-            return res.status(400).json({ message: 'ID de terapia no válido.' });
-        }
-        res.status(500).json({ message: 'Error del servidor al eliminar la terapia.' });
-    }
-};
+    res.status(200).json({ status: 'success', message: 'Terapia eliminada exitosamente.' });
+});
 
 module.exports = {
     crearTerapia,

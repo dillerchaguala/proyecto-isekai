@@ -1,22 +1,36 @@
-// controllers/userController.js
+// backend-isekai/controllers/userController.js
 const Usuario = require('../models/User');
 const Terapia = require('../models/Terapia');
 const Logro = require('../models/Logro');
-const { otorgaDesafios } = require('./desafioController'); 
+const { otorgaDesafios } = require('./desafioController'); // Importa la función otorgaDesafios
 
-// @desc    Obtener perfil de usuario
-// @route   GET /api/users/profile
-// @access  Private (solo usuarios autenticados)
-const PerfilUsuario = async (req, res) => {
-    try {
-        const usuario = await Usuario.findById(req.usuario._id)
-            .select('-contrasena')
-            .populate('terapiasCompletadas.terapia', 'titulo descripcion tipo puntosXP')
-            .populate('logrosConseguidos.logro')
-            .populate('desafiosCompletados.desafio'); 
+// Importamos las utilidades para un manejo de errores consistente
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 
-        if (usuario) {
-            res.status(200).json({
+/**
+ * @desc    Obtener perfil de usuario
+ * @route   GET /api/users/profile
+ * @access  Private (solo usuarios autenticados - rol verificado por middleware)
+ */
+const PerfilUsuario = catchAsync(async (req, res, next) => {
+    // req.usuario._id es proporcionado por el middleware de autenticación (protegerRuta)
+    const usuario = await Usuario.findById(req.usuario._id)
+        .select('-contrasena') // Excluye la contraseña
+        // CAMBIO: Usar 'nombre' en lugar de 'titulo' al poblar terapias
+        .populate('terapiasCompletadas.terapia', 'nombre descripcion tipo puntosXP')
+        .populate('logrosConseguidos.logro')
+        .populate('desafiosCompletados.desafio');
+
+    if (!usuario) {
+        return next(new AppError('Usuario no encontrado.', 404));
+    }
+
+    // Respuesta consistente con el formato { status: 'success', data: { usuario: ... } }
+    res.status(200).json({
+        status: 'success',
+        data: {
+            usuario: {
                 _id: usuario._id,
                 nombreUsuario: usuario.nombreUsuario,
                 correoElectronico: usuario.correoElectronico,
@@ -25,94 +39,103 @@ const PerfilUsuario = async (req, res) => {
                 nivelActual: usuario.nivelActual,
                 terapiasCompletadas: usuario.terapiasCompletadas,
                 logrosConseguidos: usuario.logrosConseguidos,
-                desafiosCompletados: usuario.desafiosCompletados, 
+                desafiosCompletados: usuario.desafiosCompletados,
                 createdAt: usuario.createdAt,
                 updatedAt: usuario.updatedAt
-            });
-        } else {
-            res.status(404).json({ message: 'Usuario no encontrado.' });
+            }
         }
-    } catch (error) {
-        console.error("Error en PerfilUsuario:", error.message);
-        if (error.kind === 'ObjectId') {
-            return res.status(400).json({ message: 'ID de usuario no válido.' });
-        }
-        res.status(500).json({ message: 'Error del servidor al obtener el perfil de usuario.' });
-    }
-};
+    });
+});
 
-// @desc    Marcar una terapia como completada por el usuario
-// @route   POST /api/users/complete-therapy
-// @access  Private (Solo pacientes)
-const TareaCompletada = async (req, res) => {
+/**
+ * @desc    Marcar una terapia como completada por el usuario
+ * @route   POST /api/users/complete-therapy
+ * @access  Private (Solo pacientes - rol verificado por middleware)
+ */
+const TareaCompletada = catchAsync(async (req, res, next) => {
     const { idTerapia } = req.body;
-    const usuarioId = req.usuario._id;
-    const rolUsuario = req.usuario.rol;
+    const usuarioId = req.usuario._id; // ID del usuario autenticado
 
-    if (rolUsuario !== 'paciente') {
-        return res.status(403).json({ message: 'Acceso denegado. Solo los pacientes pueden marcar terapias como completadas.' });
+    // NO es necesario repetir la validación de rol aquí. El middleware de la ruta
+    // (ej. autorizarRol(['paciente'])) ya debe haber verificado el rol.
+
+    const usuario = await Usuario.findById(usuarioId);
+    const terapia = await Terapia.findById(idTerapia);
+
+    if (!usuario) {
+        return next(new AppError('Usuario no encontrado.', 404));
+    }
+    if (!terapia) {
+        return next(new AppError('Terapia no encontrada.', 404));
     }
 
-    try {
-        const usuario = await Usuario.findById(usuarioId)
-            .populate('terapiasCompletadas.terapia', 'titulo descripcion tipo puntosXP')
-            .populate('logrosConseguidos.logro')
-            .populate('desafiosCompletados.desafio'); 
+    // CAMBIO: Usar !terapia.isActive en lugar de terapia.estado !== 'activo'
+    if (!terapia.isActive) {
+        return next(new AppError('Esta terapia no está activa y no puede ser completada.', 400));
+    }
 
-        const terapia = await Terapia.findById(idTerapia);
+    // Verificar nivel requerido
+    if (usuario.nivelActual < terapia.nivelRequerido) {
+        return next(new AppError(`Necesitas ser al menos Nivel ${terapia.nivelRequerido} para completar esta terapia.`, 400));
+    }
 
-        if (!usuario) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
-        }
-        if (!terapia) {
-            return res.status(404).json({ message: 'Terapia no encontrada.' });
-        }
+    // Verificar si la terapia ya fue completada por el usuario
+    const yaCompletada = usuario.terapiasCompletadas.some(
+        (item) => item.terapia.toString() === idTerapia // Asegúrate de comparar IDs como strings
+    );
 
-        if (terapia.estado !== 'activo') {
-            return res.status(400).json({ message: 'Esta terapia no está activa y no puede ser completada.' });
-        }
+    if (yaCompletada) {
+        return next(new AppError('Ya has completado esta terapia anteriormente.', 400));
+    }
 
-        if (usuario.nivelActual < terapia.nivelRequerido) {
-            return res.status(400).json({ message: `Necesitas ser al menos Nivel ${terapia.nivelRequerido} para completar esta terapia.` });
-        }
+    // Añadir la terapia a las terapias completadas del usuario
+    usuario.terapiasCompletadas.push({
+        terapia: terapia._id,
+        xpGanado: terapia.puntosXP,
+        fechaCompletado: new Date(),
+    });
 
-        const yaCompletada = usuario.terapiasCompletadas.some(
-            (item) => item.terapia._id.toString() === idTerapia
-        );
+    // Añadir XP al usuario
+    usuario.puntosExperiencia += terapia.puntosXP;
 
-        if (yaCompletada) {
-            return res.status(400).json({ message: 'Ya has completado esta terapia anteriormente.' });
-        }
+    // Lógica de subida de nivel
+    const xpParaSiguienteNivel = {
+        1: 200, 2: 500, 3: 1000, 4: 1800, 5: 2800 // Añade más niveles si es necesario
+    };
+    let nuevoNivel = usuario.nivelActual;
+    while (xpParaSiguienteNivel[nuevoNivel] && usuario.puntosExperiencia >= xpParaSiguienteNivel[nuevoNivel]) {
+        nuevoNivel++;
+        usuario.nivelActual = nuevoNivel;
+    }
 
-        usuario.terapiasCompletadas.push({
-            terapia: terapia._id,
-            xpGanado: terapia.puntosXP,
-            fechaCompletado: new Date(),
-        });
+    // Guardar los cambios en el usuario
+    await usuario.save();
 
-        usuario.puntosExperiencia += terapia.puntosXP;
+    // Otorgar Logros y Desafíos (funciones separadas para mantener la modularidad)
+    // No usamos 'await' aquí directamente en estas llamadas, porque no necesitamos que la respuesta HTTP
+    // espere a que estas operaciones secundarias se completen. Se ejecutarán en segundo plano.
+    // Sin embargo, si la respuesta del usuario necesita estos datos actualizados, sí necesitarías await.
+    // Para simplificar, asumimos que la respuesta puede ser ligeramente "eventual".
+    // Si la respuesta debe reflejar los logros/desafíos inmediatamente, usa `await` y luego popula.
+    await otorgarLogros(usuario); // Aseguramos que los logros se otorguen y se salven en el usuario
+    await otorgaDesafios(usuario, 'terapiasCompletadas', usuario.terapiasCompletadas.length);
+    await otorgaDesafios(usuario, 'xpGanado', usuario.puntosExperiencia);
+    // Nota: otorgaDesafios y otorgarLogros ya salvan al usuario internamente si hay cambios.
 
-        const xpParaSiguienteNivel = { 1: 200, 2: 500, 3: 1000 };
-        let nuevoNivel = usuario.nivelActual;
-        while (xpParaSiguienteNivel[nuevoNivel] && usuario.puntosExperiencia >= xpParaSiguienteNivel[nuevoNivel]) {
-            nuevoNivel++;
-            usuario.nivelActual = nuevoNivel;
-        }
+    // Obtener el usuario actualizado con todos los `populate` para la respuesta.
+    // Realizamos la población DESPUÉS de todos los cambios y el save().
+    const usuarioActualizadoParaRespuesta = await Usuario.findById(usuarioId)
+        .select('-contrasena')
+        // CAMBIO: Usar 'nombre' en lugar de 'titulo' al poblar terapias
+        .populate('terapiasCompletadas.terapia', 'nombre descripcion tipo puntosXP')
+        .populate('logrosConseguidos.logro')
+        .populate('desafiosCompletados.desafio');
 
-        await usuario.save();
-
-        await otorgarLogros(usuario);
-        await otorgaDesafios(usuario, 'terapiasCompletadas', usuario.terapiasCompletadas.length); 
-        await otorgaDesafios(usuario, 'xpGanado', usuario.puntosExperiencia); 
-
-        const usuarioActualizadoParaRespuesta = await Usuario.findById(usuarioId)
-            .select('-contrasena')
-            .populate('terapiasCompletadas.terapia', 'titulo descripcion tipo puntosXP')
-            .populate('logrosConseguidos.logro')
-            .populate('desafiosCompletados.desafio'); 
-
-        res.status(200).json({
-            message: 'Terapia marcada como completada exitosamente.',
+    // Respuesta consistente
+    res.status(200).json({
+        status: 'success',
+        message: 'Terapia marcada como completada exitosamente.',
+        data: {
             usuario: {
                 _id: usuarioActualizadoParaRespuesta._id,
                 nombreUsuario: usuarioActualizadoParaRespuesta.nombreUsuario,
@@ -120,65 +143,62 @@ const TareaCompletada = async (req, res) => {
                 nivelActual: usuarioActualizadoParaRespuesta.nivelActual,
                 terapiasCompletadas: usuarioActualizadoParaRespuesta.terapiasCompletadas,
                 logrosConseguidos: usuarioActualizadoParaRespuesta.logrosConseguidos,
-                desafiosCompletados: usuarioActualizadoParaRespuesta.desafiosCompletados, 
+                desafiosCompletados: usuarioActualizadoParaRespuesta.desafiosCompletados,
             },
-        });
+        },
+    });
+});
 
-    } catch (error) {
-        console.error("Error en TareaCompletada:", error.message);
-        if (error.kind === 'ObjectId') {
-            return res.status(400).json({ message: 'ID de usuario o terapia no válido.' });
+/**
+ * @desc    Función auxiliar para otorgar logros.
+ * Es llamada internamente por `TareaCompletada` y podría ser llamada por otras funciones.
+ */
+const otorgarLogros = catchAsync(async (usuario) => {
+    // Los logros solo se otorgarán si están activos.
+    const todosLosLogros = await Logro.find({ isActive: true });
+    // Aseguramos que logro._id sea un string para la comparación
+    const logrosActualesIds = usuario.logrosConseguidos.map(lc => lc.logro.toString());
+    let logrosOtorgadosEnEstaRonda = 0;
+
+    for (const logro of todosLosLogros) {
+        if (logrosActualesIds.includes(logro._id.toString())) {
+            continue; // Ya tiene este logro
         }
-        res.status(500).json({ message: 'Error del servidor al marcar la terapia como completada.' });
+
+        let criterioCumplido = false;
+        switch (logro.criterio.tipo) {
+            case 'terapiasCompletadas':
+                if (usuario.terapiasCompletadas.length >= logro.criterio.valor) { criterioCumplido = true; }
+                break;
+            case 'nivelAlcanzado':
+                if (usuario.nivelActual >= logro.criterio.valor) { criterioCumplido = true; }
+                break;
+            case 'xpAcumulado':
+                if (usuario.puntosExperiencia >= logro.criterio.valor) { criterioCumplido = true; }
+                break;
+            // Si hay otros tipos de criterios, añádelos aquí.
+            default:
+                console.warn(`Tipo de criterio de logro desconocido: ${logro.criterio.tipo}`);
+                break;
+        }
+
+        if (criterioCumplido) {
+            usuario.logrosConseguidos.push({
+                logro: logro._id,
+                fechaConseguido: new Date(),
+            });
+            console.log(`Logro conseguido por ${usuario.nombreUsuario}: ${logro.nombre}`);
+            logrosOtorgadosEnEstaRonda++;
+        }
     }
-};
 
-const otorgarLogros = async (usuario) => {
-    try {
-        const todosLosLogros = await Logro.find({});
-        const logrosActualesIds = usuario.logrosConseguidos.map(lc => lc.logro._id.toString());
-        let logrosOtorgadosEnEstaRonda = 0;
-
-        for (const logro of todosLosLogros) {
-            if (logrosActualesIds.includes(logro._id.toString())) {
-                continue;
-            }
-
-            let criterioCumplido = false;
-            switch (logro.criterio.tipo) {
-                case 'terapiasCompletadas':
-                    if (usuario.terapiasCompletadas.length >= logro.criterio.valor) { criterioCumplido = true; }
-                    break;
-                case 'nivelAlcanzado':
-                    if (usuario.nivelActual >= logro.criterio.valor) { criterioCumplido = true; }
-                    break;
-                case 'xpAcumulado':
-                    if (usuario.puntosExperiencia >= logro.criterio.valor) { criterioCumplido = true; }
-                    break;
-                default:
-                    console.warn(`Tipo de criterio de logro desconocido: ${logro.criterio.tipo}`);
-                    break;
-            }
-
-            if (criterioCumplido) {
-                usuario.logrosConseguidos.push({
-                    logro: logro._id,
-                    fechaConseguido: new Date(),
-                });
-                console.log(`Logro conseguido por ${usuario.nombreUsuario}: ${logro.nombre}`);
-                logrosOtorgadosEnEstaRonda++;
-            }
-        }
-
-        if (logrosOtorgadosEnEstaRonda > 0) {
-            await usuario.save();
-            console.log(`Usuario ${usuario.nombreUsuario} actualizado con ${logrosOtorgadosEnEstaRonda} logros nuevos.`);
-        }
-
-    } catch (error) {
-        console.error("Error en otorgarLogros:", error.message);
+    if (logrosOtorgadosEnEstaRonda > 0) {
+        // Solo guardamos si hubo cambios para evitar escrituras innecesarias en la DB
+        await usuario.save();
+        console.log(`Usuario ${usuario.nombreUsuario} actualizado con ${logrosOtorgadosEnEstaRonda} logros nuevos.`);
     }
-};
+    // No se envía respuesta HTTP desde aquí, ya que es una función auxiliar.
+});
 
 module.exports = {
     PerfilUsuario,

@@ -2,57 +2,54 @@ const mongoose = require('mongoose');
 
 const DesafioSchema = mongoose.Schema(
     {
-        nombre: { // COINCIDE
+        nombre: {
             type: String,
             required: [true, 'El nombre del desafío es obligatorio.'],
             unique: true,
             trim: true,
         },
-        descripcion: { // COINCIDE
+        descripcion: {
             type: String,
             required: [true, 'La descripción del desafío es obligatoria.'],
         },
-        // AÑADIDO: 'fechaCreacion' para coincidir con el frontend
-        // Nota: 'timestamps: true' ya te da un 'createdAt'. Puedes usarlo o este.
-        // Si usas este, considera si necesitas 'createdAt' también.
-        fechaCreacion: {
-            type: Date,
-            default: Date.now,
-            required: true // El frontend lo marca como requerido
-        },
-        // AÑADIDO: 'isActive' para coincidir con el frontend
+        // 'fechaCreacion' se elimina y se usa 'createdAt' de timestamps para simplificar.
+        // Si realmente necesitas 'fechaCreacion' separado, hazlo required: false y maneja su defecto en el controlador.
+
         isActive: {
             type: Boolean,
-            default: false // O true, según tu preferencia inicial
+            default: false // O true, según tu preferencia inicial para los nuevos desafíos
         },
 
-        // Campos existentes en el backend que NO están en el frontend config, pero que puedes mantener:
-        tipo: { // Si el frontend no lo gestiona, el backend debería asignarlo o ignorarlo en el CRUD
+        // --- CAMPOS AJUSTADOS PARA COMPATIBILIDAD CON EL CRUD DEL FRONTEND ---
+        // Ahora son 'required: false' porque el frontend CrudManager no los gestiona.
+        // Si necesitas que sean requeridos, DEBES añadirlos al 'desafioConfig' del frontend.
+        tipo: {
             type: String,
-            required: [true, 'El tipo de criterio del desafío es obligatorio.'],
-            enum: ['terapiasCompletadas', 'meditacionMinutos', 'registroAnimo', 'xpGanado'],
+            required: false, // CAMBIO: ahora opcional para el CRUD
+            enum: ['terapiasCompletadas', 'meditacionMinutos', 'registroAnimo', 'xpGanado', 'ninguno'], // Añade 'ninguno' como default o si es opcional
+            default: 'ninguno' // Añade un valor por defecto si no se proporciona
         },
         valorRequerido: {
             type: Number,
-            required: [true, 'El valor requerido para el desafío es obligatorio.'],
-            min: 1,
+            required: false, // CAMBIO: ahora opcional
+            min: 0,
+            default: 0 // Añade un valor por defecto
         },
         recompensaXP: {
             type: Number,
-            required: [true, 'La recompensa de XP es obligatoria.'],
+            required: false, // CAMBIO: ahora opcional
             min: 0,
+            default: 0 // Añade un valor por defecto
         },
         frecuencia: {
             type: String,
-            required: [true, 'La frecuencia del desafío es obligatoria.'],
-            enum: ['diario', 'semanal', 'unico'],
+            required: false, // CAMBIO: ahora opcional
+            enum: ['diario', 'semanal', 'unico', 'no aplica'], // Añade 'no aplica' o similar
+            default: 'no aplica' // Añade un valor por defecto
         },
     },
     {
         timestamps: true, // Esto te da 'createdAt' y 'updatedAt' automáticamente.
-                           // Si 'fechaCreacion' ya lo manejas, 'createdAt' podría ser redundante.
-                           // Puedes acceder a 'createdAt' si prefieres no tener 'fechaCreacion' separado
-                           // y luego renombrarlo en el controlador si es necesario.
     }
 );
 
