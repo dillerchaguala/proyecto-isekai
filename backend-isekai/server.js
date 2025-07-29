@@ -35,10 +35,7 @@ app.use(cors({
 // --- Rutas de la API ---
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
-// app.use('/api/terapias', require('./routes/terapias'));
-// app.use('/api/logros', require('./routes/logros'));
-// app.use('/api/desafios', require('./routes/desafio'));
-// app.use('/api/estado-animo', require('./routes/estadoAnimo'));
+
 
 // Ruta genérica para CrudManager
 app.use('/api/crud', require('./routes/crud'));

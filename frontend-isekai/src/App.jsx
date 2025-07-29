@@ -1,6 +1,9 @@
 // frontend-isekai/src/App.jsx
 import React from 'react';
+import './index.css'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // Importa tus componentes de página
 import Login from './pages/Login';
@@ -97,65 +100,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          {/* <Route
-            path="/terapias"
-            element={
-              <PrivateRoute>
-                <ListaTerapias />
-              </PrivateRoute>
-            }
-          /> */}
-          {/* Aquí podrías añadir rutas como /mis-terapias, /explorar-logros para pacientes */}
-
-
-          {/* Rutas Protegidas POR ROL (Solo para Administradores y/o Terapeutas) */}
-          {/* <Route
-            path="/terapias/crear"
-            element={
-              <PrivateRoute allowedRoles={['administrador', 'terapeuta']}>
-                <CrearTerapia />
-              </PrivateRoute>
-            }
-          /> */}
-
-          {/*
-          <Route
-            path="/logros/crear"
-            element={
-              <PrivateRoute allowedRoles={['administrador', 'terapeuta']}>
-                <CrearLogro />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/logros"
-            element={
-              <PrivateRoute allowedRoles={['administrador', 'terapeuta']}>
-                <ListaLogros />
-              </PrivateRoute>
-            }
-          />
-          */}
-
-
-          {/*
-          <Route
-            path="/desafios/crear"
-            element={
-              <PrivateRoute allowedRoles={['administrador', 'terapeuta']}>
-                <CrearDesafio />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/actividades/crear"
-            element={
-              <PrivateRoute allowedRoles={['administrador', 'terapeuta']}>
-                <CrearActividad />
-              </PrivateRoute>
-            }
-          />
-          */}
+          
 
           {/* --- ¡NUEVA RUTA PARA ADMINPAGE CON CRUD MANAGER! --- */}
           <Route
