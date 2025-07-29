@@ -12,7 +12,14 @@ const app = express();
 // --- Conectar a la base de datos MongoDB ---
 connectDB();
 
+
 // --- Middlewares Globales ---
+// Middleware de logging para ver todas las peticiones entrantes
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.originalUrl}`);
+  next();
+});
+
 // Middleware para parsear el cuerpo de las solicitudes JSON
 app.use(express.json());
 
@@ -28,20 +35,25 @@ app.use(cors({
 // --- Rutas de la API ---
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
-app.use('/api/terapias', require('./routes/terapias'));
-app.use('/api/logros', require('./routes/logros'));
-app.use('/api/desafios', require('./routes/desafio')); // CAMBIO: 'Desafio' a 'desafios'
-app.use('/api/estado-animo', require('./routes/estadoAnimo'));
+// app.use('/api/terapias', require('./routes/terapias'));
+// app.use('/api/logros', require('./routes/logros'));
+// app.use('/api/desafios', require('./routes/desafio'));
+// app.use('/api/estado-animo', require('./routes/estadoAnimo'));
+
+// Ruta genérica para CrudManager
+app.use('/api/crud', require('./routes/crud'));
 
 // --- Ruta de prueba simple ---
 app.get('/', (req, res) => {
     res.send('API de Isekai está corriendo...');
 });
 
+
 // --- Manejo de errores ---
 // Captura cualquier ruta no definida (404 Not Found)
+const AppError = require('./utils/appError');
 app.all('*', (req, res, next) => {
-    next(new errorConverter(`No se encontró la ruta: ${req.originalUrl}`, 404));
+    next(new AppError(`No se encontró la ruta: ${req.originalUrl}`, 404));
 });
 
 // Middleware para convertir errores (si usas una clase de error personalizada para AppError)

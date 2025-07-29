@@ -1,0 +1,269 @@
+/* Estilos para la landing page ISekai */
+
+/* --- ESTILO MODERNO Y VERTICAL --- */
+.isekai-home {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #f7f9fa;
+  color: #2c3e50;
+  min-height: 100vh;
+}
+.isekai-hero {
+  position: relative;
+  height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.isekai-hero-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+}
+.isekai-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
+}
+.isekai-hero-overlay {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 40px 0 18px 0;
+  color: #fff;
+}
+.isekai-title {
+  font-size: 2.1rem;
+  font-weight: bold;
+  margin-bottom: 6px;
+  text-shadow: 2px 2px 8px #000;
+}
+.isekai-subtitle {
+  font-size: 1.05rem;
+  margin-bottom: 0;
+}
+.isekai-navbar {
+  position: relative;
+  z-index: 3;
+  background: rgba(44,62,80,0.8);
+  padding: 0.3rem 0;
+  text-align: center;
+}
+.isekai-navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+.isekai-navbar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.98rem;
+  transition: color 0.2s;
+}
+.isekai-navbar a.isekai-btn {
+  background: #27ae60;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: bold;
+}
+.isekai-navbar a:hover {
+  color: #27ae60;
+}
+
+.isekai-hero-icons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 18px 0;
+}
+.isekai-hero-icon img {
+  width: 48px;
+  height: 48px;
+}
+.isekai-hero-icon div {
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.isekai-niveles {
+  background: #fff;
+  padding: 24px 0 10px 0;
+  text-align: center;
+}
+.isekai-niveles h2 {
+  font-size: 1.5rem;
+  margin-bottom: 18px;
+}
+.isekai-niveles-cards {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+.isekai-card {
+  background: #eafaf1;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  padding: 16px 10px;
+  width: 170px;
+  min-width: 140px;
+}
+.isekai-card h3 {
+  color: #27ae60;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+.isekai-card ul {
+  text-align: left;
+  padding-left: 12px;
+  font-size: 0.95rem;
+}
+.isekai-niveles-line {
+  height: 2px;
+  background: #e0e0e0;
+  margin: 18px auto 0 auto;
+  max-width: 400px;
+}
+
+.isekai-beneficios {
+  background: #f7f9fa;
+  padding: 18px 0 10px 0;
+  text-align: center;
+}
+.isekai-beneficios-list {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.isekai-beneficio {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  padding: 10px 6px;
+  width: 120px;
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.isekai-beneficio img {
+  width: 38px;
+  height: 38px;
+}
+.isekai-beneficio p {
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+.isekai-beneficios-desc {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+.isekai-logo-central {
+  font-size: 2.2rem;
+  color: #e0e0e0;
+  font-weight: bold;
+  margin: 0;
+}
+
+.isekai-viaje-emocional {
+  padding: 18px 0;
+}
+.isekai-viaje-emocional h2 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+.isekai-viaje-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.isekai-viaje-text {
+  max-width: 320px;
+  font-size: 0.98rem;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.isekai-viaje-img img {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #e0e0e0;
+}
+
+.isekai-icons-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin: 12px 0;
+}
+.isekai-icon-bottom {
+  text-align: center;
+}
+.isekai-icon-bottom img {
+  width: 38px;
+  height: 38px;
+}
+.isekai-icon-bottom p {
+  font-size: 0.9rem;
+  margin: 4px 0 0 0;
+}
+
+.isekai-mision {
+  padding: 18px 0;
+  text-align: center;
+}
+.isekai-mision h2 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+.isekai-mision p {
+  font-size: 0.98rem;
+}
+
+.isekai-footer {
+  background: #e0e0e0;
+  color: #2c3e50;
+  padding: 18px 0 8px 0;
+  text-align: center;
+  font-size: 0.98rem;
+}
+.isekai-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 400px;
+  margin: 0 auto 8px auto;
+  flex-wrap: wrap;
+}
+.isekai-footer-social {
+  text-align: right;
+}
+.isekai-footer-social img {
+  width: 22px;
+  height: 22px;
+  margin-right: 6px;
+}
+.isekai-footer-copy {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+@media (max-width: 800px) {
+  .isekai-niveles-cards, .isekai-beneficios-list {
+    flex-direction: column;
+    align-items: center;
+  }
+  .isekai-footer-content {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

@@ -2,7 +2,7 @@
 const Usuario = require('../models/User');
 const Terapia = require('../models/Terapia');
 const Logro = require('../models/Logro');
-const { otorgaDesafios } = require('./desafioController'); // Importa la función otorgaDesafios
+// const { otorgaDesafios } = require('./desafioController'); // Eliminado: función ya no disponible
 
 // Importamos las utilidades para un manejo de errores consistente
 const AppError = require('../utils/appError');
@@ -118,9 +118,7 @@ const TareaCompletada = catchAsync(async (req, res, next) => {
     // Para simplificar, asumimos que la respuesta puede ser ligeramente "eventual".
     // Si la respuesta debe reflejar los logros/desafíos inmediatamente, usa `await` y luego popula.
     await otorgarLogros(usuario); // Aseguramos que los logros se otorguen y se salven en el usuario
-    await otorgaDesafios(usuario, 'terapiasCompletadas', usuario.terapiasCompletadas.length);
-    await otorgaDesafios(usuario, 'xpGanado', usuario.puntosExperiencia);
-    // Nota: otorgaDesafios y otorgarLogros ya salvan al usuario internamente si hay cambios.
+    // otorgaDesafios eliminado: lógica de desafíos debe ser adaptada a la nueva estructura CRUD genérica.
 
     // Obtener el usuario actualizado con todos los `populate` para la respuesta.
     // Realizamos la población DESPUÉS de todos los cambios y el save().

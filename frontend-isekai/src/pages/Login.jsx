@@ -47,9 +47,15 @@ function Login() {
 
             if (respuesta.ok) { // Si la respuesta HTTP fue 2xx (ej. 200 OK)
                 console.log('DEBUG 6: Login exitoso, almacenando token y usuario...'); 
-                localStorage.setItem('token', datos.token);
-                localStorage.setItem('usuario', JSON.stringify(datos.usuario));
-                
+                const token = datos.token || (datos.data && datos.data.token);
+                localStorage.setItem('token', token);
+                // Soportar diferentes formatos de respuesta del backend
+                const userObj = datos.usuario || (datos.data && (datos.data.usuario || datos.data.user));
+                if (userObj) {
+                  localStorage.setItem('usuario', JSON.stringify(userObj));
+                } else {
+                  localStorage.removeItem('usuario');
+                }
                 console.log('DEBUG 7: Intentando navegar a /dashboard...'); 
                 navegar('/dashboard'); 
                 console.log('DEBUG 8: Navegación a /dashboard iniciada (esta línea puede no verse si la redirección es instantánea).'); 

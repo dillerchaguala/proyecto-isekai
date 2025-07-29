@@ -42,7 +42,8 @@ const protegerRuta = catchAsync(async (req, res, next) => {
         next(); // Permite que la petición continúe al siguiente middleware/controlador
 
     } catch (error) {
-        // Aquí capturamos errores específicos de JWT (token inválido, expirado, etc.)
+        // Mostrar el error real de JWT en consola para depuración
+        console.log('JWT ERROR:', error);
         if (error.name === 'JsonWebTokenError') {
             return next(new AppError('No autorizado, token inválido.', 401));
         }

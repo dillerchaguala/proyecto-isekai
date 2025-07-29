@@ -49,7 +49,18 @@ function CrudManager({ resourceName, endpoint, fields, columns, initialValues })
             // Asumiendo que tu backend devuelve { status: 'success', data: { [endpoint]: [] } }
             // Donde [endpoint] sería 'logros', 'terapias', etc.
             // Asegúrate de que `data.data` contiene una propiedad con el nombre de tu `endpoint`
-            setResources(data.data[endpoint]); 
+            const resourceKey = resourceName; // 'logros', 'terapias', etc.
+            let recursos = data.data && data.data[resourceKey];
+            // Si no existe la clave esperada, busca el primer array en data.data
+            if (!Array.isArray(recursos)) {
+                if (data.data) {
+                    const valores = Object.values(data.data);
+                    recursos = valores.find(v => Array.isArray(v)) || [];
+                } else {
+                    recursos = [];
+                }
+            }
+            setResources(recursos);
         } catch (err) {
             console.error(`Error al cargar ${resourceName}:`, err);
             setError(err.message || `Ocurrió un error inesperado al cargar los ${resourceName}.`);
@@ -89,6 +100,16 @@ function CrudManager({ resourceName, endpoint, fields, columns, initialValues })
                 throw new Error(errorData.message || `Error al crear ${resourceName}.`);
             }
 
+            // Extraer el recurso creado del backend
+            const responseData = await response.json();
+            const createdResource = responseData?.data?.[resourceName];
+            // Actualizar el estado como array
+            setResources((prev) => {
+                if (Array.isArray(prev)) {
+                    return [ ...prev, createdResource ];
+                }
+                return [createdResource];
+            });
             setMensajeExito(`¡${resourceName.slice(0, -1)} creado exitosamente!`); // Quita la 's' final
             setIsCreating(false); // Salir del modo creación
             fetchResources(); // Recargar la lista

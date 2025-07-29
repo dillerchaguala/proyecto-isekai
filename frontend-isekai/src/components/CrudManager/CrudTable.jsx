@@ -3,7 +3,13 @@ import React from 'react';
 import './CrudTable.css'; // Crearás este archivo CSS en el siguiente paso
 
 function CrudTable({ resources, columns, onEdit, onDelete }) {
-    if (!resources || resources.length === 0) {
+    if (!Array.isArray(resources)) {
+        return <p>Error: los datos no son válidos para mostrar.</p>;
+    }
+    if (!Array.isArray(columns)) {
+        return <p>Error: las columnas no están definidas correctamente.</p>;
+    }
+    if (resources.length === 0) {
         return <p>No hay recursos para mostrar.</p>; // Mensaje si la lista está vacía
     }
 

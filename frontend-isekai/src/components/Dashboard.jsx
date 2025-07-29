@@ -51,7 +51,7 @@ function Dashboard() {
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/terapias/crear')}
+                                onClick={() => navegar('/admin')}
                             >
                                 Crear Nueva Terapia
                             </button>
@@ -59,17 +59,15 @@ function Dashboard() {
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/terapias')}
+                                onClick={() => navegar('/admin')}
                             >
                                 Ver Todas las Terapias
                             </button>
                         </li>
-
-                        {/* Gestión de Logros */}
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/logros/crear')} // Ruta hipotética para crear logros
+                                onClick={() => navegar('/admin')}
                             >
                                 Crear Nuevo Logro
                             </button>
@@ -77,17 +75,15 @@ function Dashboard() {
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/logros')} // Ruta hipotética para ver todos los logros
+                                onClick={() => navegar('/admin')}
                             >
                                 Ver Todos los Logros
                             </button>
                         </li>
-
-                        {/* Gestión de Desafíos Diarios */}
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/desafios/crear')} // Ruta hipotética para crear desafíos
+                                onClick={() => navegar('/admin')}
                             >
                                 Crear Nuevo Desafío Diario
                             </button>
@@ -95,17 +91,15 @@ function Dashboard() {
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/desafios')} // Ruta hipotética para ver todos los desafíos
+                                onClick={() => navegar('/admin')}
                             >
                                 Ver Todos los Desafíos
                             </button>
                         </li>
-
-                        {/* Gestión de Actividades */}
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/actividades/crear')} // Ruta hipotética para crear actividades
+                                onClick={() => navegar('/admin')}
                             >
                                 Crear Nueva Actividad
                             </button>
@@ -113,7 +107,7 @@ function Dashboard() {
                         <li>
                             <button
                                 className={estilos.botonOpcion}
-                                onClick={() => navegar('/actividades')} // Ruta hipotética para ver todas las actividades
+                                onClick={() => navegar('/admin')}
                             >
                                 Ver Todas las Actividades
                             </button>

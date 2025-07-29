@@ -6,16 +6,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Perfil from './pages/Perfil';
 import Registro from './pages/Registro';
-import ListaTerapias from './pages/ListaTerapias';
-import CrearTerapia from './pages/CrearTerapia';
 import Dashboard from './components/Dashboard';
-import CrearLogro from './pages/CrearLogro';
-import ListaLogros from './pages/ListaLogros';
-import AdminPage from './pages/AdminPage'; 
+import AdminPage from './pages/AdminPage';
+import Home from './pages/Home';
 
 // *** NUEVOS COMPONENTES DE PÁGINA PARA DESAFÍOS Y ACTIVIDADES (si aún existen, si no, se irán con la refactorización) ***
-import CrearDesafio from './pages/CrearDesafio';    // Importa el nuevo componente
-import CrearActividad from './pages/CrearActividad'; // Importa el nuevo componente
+// import CrearDesafio from './pages/CrearDesafio';
+// import CrearActividad from './pages/CrearActividad';
 
 import './App.css';
 
@@ -27,11 +24,13 @@ import './App.css';
 // Asumo que tu import 'PrivateRoute from './components/PrivateRoute'' es la correcta.
 
 const PrivateRoute = ({ children, allowedRoles }) => {
+
   const token = localStorage.getItem('token');
   const usuarioGuardado = localStorage.getItem('usuario');
   let usuario = null;
 
-  if (usuarioGuardado) {
+  // Solo intentar parsear si el valor es válido y no es el string 'undefined'
+  if (usuarioGuardado && usuarioGuardado !== 'undefined') {
     try {
       usuario = JSON.parse(usuarioGuardado);
     } catch (e) {
@@ -67,16 +66,17 @@ function App() {
   return (
     <Router>
       <div className="App">
+
         <Routes>
           {/* Rutas de autenticación (Públicas) */}
           <Route path="/iniciar-sesion" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
 
-          {/* Ruta Raíz: Redirige al dashboard si hay token, o al login si no */}
+          {/* Ruta Raíz: Landing page pública solo si NO hay sesión */}
           <Route
             path="/"
             element={
-              localStorage.getItem('token') ? <Navigate to="/dashboard" replace /> : <Navigate to="/iniciar-sesion" replace />
+              localStorage.getItem('token') ? <Navigate to="/dashboard" replace /> : <Home />
             }
           />
 
@@ -97,28 +97,28 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/terapias"
             element={
               <PrivateRoute>
                 <ListaTerapias />
               </PrivateRoute>
             }
-          />
+          /> */}
           {/* Aquí podrías añadir rutas como /mis-terapias, /explorar-logros para pacientes */}
 
 
           {/* Rutas Protegidas POR ROL (Solo para Administradores y/o Terapeutas) */}
-          <Route
+          {/* <Route
             path="/terapias/crear"
             element={
               <PrivateRoute allowedRoles={['administrador', 'terapeuta']}>
                 <CrearTerapia />
               </PrivateRoute>
             }
-          />
+          /> */}
 
-          {/* RUTA PARA CREAR LOGROS */}
+          {/*
           <Route
             path="/logros/crear"
             element={
@@ -135,9 +135,10 @@ function App() {
               </PrivateRoute>
             }
           />
+          */}
 
 
-          {/* *** NUEVAS RUTAS PARA DESAFÍOS Y ACTIVIDADES (si aún existen, si no, se irán con la refactorización) *** */}
+          {/*
           <Route
             path="/desafios/crear"
             element={
@@ -154,6 +155,7 @@ function App() {
               </PrivateRoute>
             }
           />
+          */}
 
           {/* --- ¡NUEVA RUTA PARA ADMINPAGE CON CRUD MANAGER! --- */}
           <Route
