@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities;/* src/index.css */
+
+
+
+html, body, #root, .App {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important; /* Usamos 100% para evitar scroll horizontal por la barra vertical */
+  min-height: 100vh !important;
+  height: auto !important; /* Important: Permite que el contenido determine la altura */
+  overflow-x: hidden !important; /* Crucial para evitar scroll horizontal */
+  box-sizing: border-box !important;
+}
+
+/* Asegúrate de que tu #root o el contenedor principal de tu app también se estire */
+#root {
+    display: flex; /* Opcional: si tu app es una SPA y quieres que #root sea flex */
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Opcional: si tu app tiene una clase 'App' en el div principal */
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}

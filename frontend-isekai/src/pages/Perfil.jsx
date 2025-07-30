@@ -1,7 +1,7 @@
 // src/pages/Perfil.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import estilos from './Perfil.module.css'; // Importa los estilos modulares
+
 
 function Perfil() {
     const [datosUsuario, setDatosUsuario] = useState(null);
@@ -56,42 +56,42 @@ function Perfil() {
 
     if (cargando) {
         return (
-            <div className={estilos.contenedorPerfil}>
-                <p className={estilos.mensajeCargando}>Cargando perfil...</p>
+            <div className="flex flex-col items-center justify-center min-h-screen bg-cyan-100 font-sans p-5">
+                <p className="text-blue-600 text-xl font-bold">Cargando perfil...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className={estilos.contenedorPerfil}>
-                <p className={estilos.mensajeError}>{error}</p>
-                <button onClick={manejarCerrarSesion} className={estilos.botonCerrarSesion}>Volver a Iniciar Sesión</button>
+            <div className="flex flex-col items-center justify-center min-h-screen bg-cyan-100 font-sans p-5">
+                <p className="text-red-600 text-lg font-semibold mb-4">{error}</p>
+                <button onClick={manejarCerrarSesion} className="px-5 py-2 rounded bg-red-600 text-white text-base mt-2 font-semibold transition-colors duration-300 hover:bg-red-800">Volver a Iniciar Sesión</button>
             </div>
         );
     }
 
     if (!datosUsuario) {
         return (
-            <div className={estilos.contenedorPerfil}>
-                <p className={estilos.mensajeError}>No se pudo cargar la información del usuario.</p>
-                <button onClick={manejarCerrarSesion} className={estilos.botonCerrarSesion}>Volver a Iniciar Sesión</button>
+            <div className="flex flex-col items-center justify-center min-h-screen bg-cyan-100 font-sans p-5">
+                <p className="text-red-600 text-lg font-semibold mb-4">No se pudo cargar la información del usuario.</p>
+                <button onClick={manejarCerrarSesion} className="px-5 py-2 rounded bg-red-600 text-white text-base mt-2 font-semibold transition-colors duration-300 hover:bg-red-800">Volver a Iniciar Sesión</button>
             </div>
         );
     }
 
     return (
-        <div className={estilos.contenedorPerfil}>
-            <div className={estilos.tarjetaPerfil}>
-                <h2>Bienvenido, {datosUsuario.nombreUsuario}!</h2>
-                <div className={estilos.infoUsuario}>
-                    <p><strong>Email:</strong> {datosUsuario.email}</p>
-                    <p><strong>Rol:</strong> {datosUsuario.rol}</p>
-                    <p><strong>Puntos de Experiencia (XP):</strong> {datosUsuario.puntosExperiencia}</p>
-                    <p><strong>Nivel Actual:</strong> {datosUsuario.nivelActual}</p>
-                    <p><strong>Terapias Completadas:</strong> {datosUsuario.terapiasCompletadas ? datosUsuario.terapiasCompletadas.length : 0}</p>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-cyan-100 font-sans p-5">
+            <div className="p-8 rounded-lg shadow-lg bg-white w-[400px] max-w-[90%] text-center">
+                <h2 className="mb-6 text-2xl font-bold text-gray-800">Bienvenido, {datosUsuario.nombreUsuario}!</h2>
+                <div className="mb-6 text-[1.1em] text-gray-800 leading-relaxed">
+                    <p><span className="font-bold text-blue-800">Email:</span> {datosUsuario.email}</p>
+                    <p><span className="font-bold text-blue-800">Rol:</span> {datosUsuario.rol}</p>
+                    <p><span className="font-bold text-blue-800">Puntos de Experiencia (XP):</span> {datosUsuario.puntosExperiencia}</p>
+                    <p><span className="font-bold text-blue-800">Nivel Actual:</span> {datosUsuario.nivelActual}</p>
+                    <p><span className="font-bold text-blue-800">Terapias Completadas:</span> {datosUsuario.terapiasCompletadas ? datosUsuario.terapiasCompletadas.length : 0}</p>
                 </div>
-                <button onClick={manejarCerrarSesion} className={estilos.botonCerrarSesion}>Cerrar Sesión</button>
+                <button onClick={manejarCerrarSesion} className="px-5 py-2 rounded bg-red-600 text-white text-base mt-2 font-semibold transition-colors duration-300 hover:bg-red-800">Cerrar Sesión</button>
             </div>
         </div>
     );

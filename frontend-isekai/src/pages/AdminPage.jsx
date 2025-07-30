@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import CrudManager from '../components/CrudManager/CrudManager';
 import { useNavigate } from 'react-router-dom';
-import './AdminPage.css'; // Crearás este archivo CSS en el siguiente paso
 
 // *** 1. Definición de la configuración para Logros ***
 const logroConfig = {

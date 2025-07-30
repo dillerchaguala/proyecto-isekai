@@ -1,7 +1,7 @@
 // src/pages/Registro.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import estilos from './Registro.module.css'; // Importa los estilos modulares
+
 
 function Registro() {
     const [nombreUsuario, setNombreUsuario] = useState('');
@@ -48,61 +48,62 @@ function Registro() {
         }
     };
 
+
     return (
-        <div className={estilos.contenedorRegistro}>
-            <div className={estilos.tarjetaRegistro}>
-                <h2>Registrarse</h2>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50 font-sans p-5">
+            <div className="p-8 rounded-lg shadow-xl bg-white w-[400px] max-w-[90%] text-center">
+                <h2 className="mb-6 text-2xl font-bold text-blue-900">Registrarse</h2>
                 <form onSubmit={manejarEnvio}>
-                    <div className={estilos.grupoInput}>
-                        <label htmlFor="nombreUsuario">Nombre de Usuario:</label>
+                    <div className="mb-5 text-left">
+                        <label htmlFor="nombreUsuario" className="block mb-1 font-bold text-blue-800 text-[0.95em]">Nombre de Usuario:</label>
                         <input
                             type="text"
                             id="nombreUsuario"
-                            className={estilos.inputCampo}
+                            className="w-full p-3 rounded border border-blue-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={nombreUsuario}
                             onChange={(e) => setNombreUsuario(e.target.value)}
                             required
                         />
                     </div>
-                    <div className={estilos.grupoInput}>
-                        <label htmlFor="email">Email:</label>
+                    <div className="mb-5 text-left">
+                        <label htmlFor="email" className="block mb-1 font-bold text-blue-800 text-[0.95em]">Email:</label>
                         <input
                             type="email"
                             id="email"
-                            className={estilos.inputCampo}
+                            className="w-full p-3 rounded border border-blue-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
-                    <div className={estilos.grupoInput}>
-                        <label htmlFor="contrasena">Contraseña:</label>
+                    <div className="mb-5 text-left">
+                        <label htmlFor="contrasena" className="block mb-1 font-bold text-blue-800 text-[0.95em]">Contraseña:</label>
                         <input
                             type="password"
                             id="contrasena"
-                            className={estilos.inputCampo}
+                            className="w-full p-3 rounded border border-blue-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={contrasena}
                             onChange={(e) => setContrasena(e.target.value)}
                             required
                         />
                     </div>
-                    <div className={estilos.grupoInput}>
-                        <label htmlFor="confirmarContrasena">Confirmar Contraseña:</label>
+                    <div className="mb-5 text-left">
+                        <label htmlFor="confirmarContrasena" className="block mb-1 font-bold text-blue-800 text-[0.95em]">Confirmar Contraseña:</label>
                         <input
                             type="password"
                             id="confirmarContrasena"
-                            className={estilos.inputCampo}
+                            className="w-full p-3 rounded border border-blue-200 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={confirmarContrasena}
                             onChange={(e) => setConfirmarContrasena(e.target.value)}
                             required
                         />
                     </div>
-                    {error && <p className={estilos.mensajeError}>{error}</p>}
-                    {exito && <p className={estilos.mensajeExito}>{exito}</p>} {/* Mensaje de éxito */}
-                    <button type="submit" className={estilos.botonPrincipal}>Registrarse</button>
+                    {error && <p className="text-red-600 mt-4 text-[0.95em] font-medium">{error}</p>}
+                    {exito && <p className="text-green-600 mt-4 text-[0.95em] font-medium">{exito}</p>}
+                    <button type="submit" className="w-full py-3 rounded bg-green-600 text-white text-lg font-bold cursor-pointer mt-4 transition-colors duration-300 hover:bg-green-800 active:translate-y-0.5">Registrarse</button>
                 </form>
-                <p className={estilos.textoLogin}>
-                    ¿Ya tienes cuenta? <a href="/iniciar-sesion" className={estilos.enlaceLogin}>Iniciar Sesión</a>
+                <p className="mt-7 text-sm text-gray-500">
+                    ¿Ya tienes cuenta? <a href="/iniciar-sesion" className="text-blue-600 font-bold hover:underline">Inicia sesión aquí</a>
                 </p>
             </div>
         </div>

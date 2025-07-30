@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import estilos from './Login.module.css';
+
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -70,37 +70,37 @@ function Login() {
     };
 
     return (
-        <div className={estilos.contenedorLogin}>
-            <div className={estilos.tarjetaLogin}>
-                <h2>Iniciar Sesión</h2>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 font-sans p-5">
+            <div className="p-8 rounded-lg shadow-lg bg-white w-[350px] max-w-[90%] text-center">
+                <h2 className="mb-6 text-2xl font-bold text-gray-800">Iniciar Sesión</h2>
                 <form onSubmit={manejarEnvio}>
-                    <div className={estilos.grupoInput}>
-                        <label htmlFor="email">Email:</label>
+                    <div className="mb-4 text-left">
+                        <label htmlFor="email" className="block mb-1 font-bold text-gray-600">Email:</label>
                         <input
                             type="email"
                             id="email"
-                            className={estilos.inputCampo}
+                            className="w-full p-2.5 mt-1 rounded border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
-                    <div className={estilos.grupoInput}>
-                        <label htmlFor="contrasena">Contraseña:</label>
+                    <div className="mb-4 text-left">
+                        <label htmlFor="contrasena" className="block mb-1 font-bold text-gray-600">Contraseña:</label>
                         <input
                             type="password"
                             id="contrasena"
-                            className={estilos.inputCampo}
+                            className="w-full p-2.5 mt-1 rounded border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
                             value={contrasena}
                             onChange={(e) => setContrasena(e.target.value)}
                             required
                         />
                     </div>
-                    {error && <p className={estilos.mensajeError}>{error}</p>}
-                    <button type="submit" className={estilos.botonPrincipal}>Iniciar Sesión</button>
+                    {error && <p className="text-red-600 mt-2 text-sm">{error}</p>}
+                    <button type="submit" className="w-full py-3 rounded bg-blue-600 text-white text-base font-semibold cursor-pointer mt-2 transition-colors duration-300 hover:bg-blue-800">Iniciar Sesión</button>
                 </form>
-                <p className={estilos.textoRegistro}>
-                    ¿No tienes cuenta? <a href="/registro" className={estilos.enlaceRegistro}>Regístrate aquí</a>
+                <p className="mt-5 text-sm text-gray-600">
+                    ¿No tienes cuenta? <a href="/registro" className="text-blue-600 font-bold hover:underline">Regístrate aquí</a>
                 </p>
             </div>
         </div>
